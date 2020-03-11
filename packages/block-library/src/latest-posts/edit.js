@@ -38,6 +38,9 @@ import { pin, list, grid } from '@wordpress/icons';
 const CATEGORIES_LIST_QUERY = {
 	per_page: -1,
 };
+const TAGS_LIST_QUERY = {
+	per_page: -1,
+};
 const MAX_POSTS_COLUMNS = 6;
 
 class LatestPostsEdit extends Component {
@@ -45,6 +48,7 @@ class LatestPostsEdit extends Component {
 		super( ...arguments );
 		this.state = {
 			categoriesList: [],
+			tagsList: [],
 		};
 	}
 
@@ -63,6 +67,20 @@ class LatestPostsEdit extends Component {
 					this.setState( { categoriesList: [] } );
 				}
 			} );
+
+		this.fetchRequest = apiFetch( {
+			path: addQueryArgs( `/wp/v2/tags`, TAGS_LIST_QUERY ),
+		} )
+			.then( ( tagsList ) => {
+				if ( this.isStillMounted ) {
+					this.setState( { tagsList } );
+				}
+			} )
+			.catch( () => {
+				if ( this.isStillMounted ) {
+					this.setState( { tagsList: [] } );
+				}
+			} );
 	}
 
 	componentWillUnmount() {
@@ -79,6 +97,8 @@ class LatestPostsEdit extends Component {
 			defaultImageHeight,
 		} = this.props;
 		const { categoriesList } = this.state;
+
+		const { tagsList } = this.state;
 		const {
 			displayFeaturedImage,
 			displayPostContentRadio,
@@ -89,6 +109,7 @@ class LatestPostsEdit extends Component {
 			order,
 			orderBy,
 			categories,
+			tags,
 			postsToShow,
 			excerptLength,
 			featuredImageAlign,
@@ -211,6 +232,8 @@ class LatestPostsEdit extends Component {
 						numberOfItems={ postsToShow }
 						categoriesList={ categoriesList }
 						selectedCategoryId={ categories }
+						tagsList={ tagsList }
+						selectedTagId={ tags }
 						onOrderChange={ ( value ) =>
 							setAttributes( { order: value } )
 						}
@@ -224,6 +247,11 @@ class LatestPostsEdit extends Component {
 						}
 						onNumberOfItemsChange={ ( value ) =>
 							setAttributes( { postsToShow: value } )
+						}
+						onTagChange={ ( value ) =>
+							setAttributes( {
+								tags: '' !== value ? value : undefined,
+							} )
 						}
 					/>
 					{ postLayout === 'grid' && (
@@ -413,6 +441,7 @@ export default withSelect( ( select, props ) => {
 		order,
 		orderBy,
 		categories,
+		tags,
 	} = props.attributes;
 	const { getEntityRecords, getMedia } = select( 'core' );
 	const { getSettings } = select( 'core/block-editor' );
@@ -420,6 +449,7 @@ export default withSelect( ( select, props ) => {
 	const latestPostsQuery = pickBy(
 		{
 			categories,
+			tags,
 			order,
 			orderby: orderBy,
 			per_page: postsToShow,
