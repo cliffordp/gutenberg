@@ -51,7 +51,7 @@ function render_block_core_latest_posts( $attributes ) {
 	}
 
 	if ( isset( $attributes['tags'] ) ) {
-		$args['tag'] = $attributes['tags'];
+		$args['tag_id'] = $attributes['tags'];
 	}
 
 	$recent_posts = get_posts( $args );
