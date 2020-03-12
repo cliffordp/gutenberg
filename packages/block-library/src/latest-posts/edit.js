@@ -33,12 +33,14 @@ import { withSelect } from '@wordpress/data';
 import { pin, list, grid } from '@wordpress/icons';
 
 /**
+ * Internal dependencies
+ */
+import FlatTermSelector from './flat-term-selector';
+
+/**
  * Module Constants
  */
 const CATEGORIES_LIST_QUERY = {
-	per_page: -1,
-};
-const TAGS_LIST_QUERY = {
 	per_page: -1,
 };
 const MAX_POSTS_COLUMNS = 6;
@@ -65,20 +67,6 @@ class LatestPostsEdit extends Component {
 			.catch( () => {
 				if ( this.isStillMounted ) {
 					this.setState( { categoriesList: [] } );
-				}
-			} );
-
-		this.fetchRequest = apiFetch( {
-			path: addQueryArgs( `/wp/v2/tags`, TAGS_LIST_QUERY ),
-		} )
-			.then( ( tagsList ) => {
-				if ( this.isStillMounted ) {
-					this.setState( { tagsList } );
-				}
-			} )
-			.catch( () => {
-				if ( this.isStillMounted ) {
-					this.setState( { tagsList: [] } );
 				}
 			} );
 	}
@@ -227,6 +215,15 @@ class LatestPostsEdit extends Component {
 				</PanelBody>
 
 				<PanelBody title={ __( 'Sorting and filtering' ) }>
+					<FlatTermSelector
+						slug={ 'post_tag' }
+						terms={ tags }
+						onTagChange={ ( value ) => {
+							setAttributes( {
+								tags: '' !== value ? tags.push( value ) : tags,
+							} );
+						} }
+					/>
 					<QueryControls
 						{ ...{ order, orderBy } }
 						numberOfItems={ postsToShow }
